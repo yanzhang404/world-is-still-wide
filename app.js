@@ -21,27 +21,41 @@
     if (raw.cover && typeof raw.cover === 'string' && /^data:image\/(jpeg|png|webp);base64,[a-zA-Z0-9+/=]+$/.test(raw.cover) && raw.cover.length < 1800000) e.cover = raw.cover;
     if (Array.isArray(raw.comics)) e.comics = raw.comics.slice(0,6).filter(c => c && typeof c.image === 'string' && /^data:image\/(jpeg|png|webp);base64,[a-zA-Z0-9+/=]+$/.test(c.image) && c.image.length < 1800000).map(c => ({image:c.image,caption:String(c.caption || '').slice(0,300)}));
     if (Array.isArray(raw.stops)) e.stops = raw.stops.slice(0,30).filter(p => p && typeof p.name === 'string' && Number.isFinite(p.lat) && Number.isFinite(p.lng) && Math.abs(p.lat)<=90 && Math.abs(p.lng)<=180).map(p=>({name:p.name.slice(0,80),lat:p.lat,lng:p.lng}));
+    e.tripId = typeof raw.tripId === 'string' && /^[a-zA-Z0-9-]{1,80}$/.test(raw.tripId) ? raw.tripId : e.id;
+    e.tripTitle = String(raw.tripTitle || '').slice(0,80);
+    e.tripStart = String(raw.tripStart || ''); e.tripEnd = String(raw.tripEnd || '');
+    if (!validDate(e.tripStart) || !validDate(e.tripEnd) || (e.tripEnd && !e.tripStart) || (e.tripEnd && e.tripEnd < e.tripStart)) throw new Error('共同旅行区间不正确。');
     return e;
   }
   function readEntries(raw) {
     if (!Array.isArray(raw) || raw.length > 200) throw new Error('备份格式不正确，最多支持 200 篇手记。');
-    const result = raw.map(normalizeEntry);
+    const originals = raw.map(normalizeEntry);
+    const oldSeedItineraries = {japan:'2024.12.26–12.28｜东京\n2024.12.29–2025.01.03｜名古屋、大阪、京都（各城市具体日程待补）','thailand-south':'普吉岛\n曼谷','thailand-north':'清迈\n清莱',indonesia:'雅加达\n巴厘岛\n科摩多岛',vietnam:'胡志明市\n大叻\n岘港\n会安\n河内'};
+    const existingIds = new Set(originals.map(e=>e.id));
+    // Upgrade untouched old placeholders without replacing anyone's written draft.
+    const result = originals.flatMap(e=>{
+      const cities = (window.YANZ_ENTRIES || []).filter(c=>c.tripId===e.id && c.id!==e.id);
+      const untouched = !e.story && !e.tips && !e.cover && !e.comics.length && e.itinerary===oldSeedItineraries[e.id];
+      return e.stops.length>1 && cities.length>1 && untouched ? cities.filter(c=>!existingIds.has(c.id)).map(normalizeEntry) : [e];
+    });
     if (new Set(result.map(e => e.id)).size !== result.length) throw new Error('手记编号重复，无法导入。');
-    return result.sort((a,b)=>(a.start || '9999').localeCompare(b.start || '9999'));
+    return result.sort((a,b)=>(a.start || a.tripStart || '9999').localeCompare(b.start || b.tripStart || '9999'));
   }
   try { const saved = localStorage.getItem(KEY); entries = readEntries(saved ? JSON.parse(saved).entries : window.YANZ_ENTRIES || []); }
   catch { try { entries = readEntries(window.YANZ_ENTRIES || []); } catch { entries = []; } setTimeout(() => toast('本地草稿无法读取，已展示发布版本。原草稿未覆盖。'), 500); }
   function commit(next) {
-    next = [...next].sort((a,b)=>(a.start || '9999').localeCompare(b.start || '9999'));
+    next = [...next].sort((a,b)=>(a.start || a.tripStart || '9999').localeCompare(b.start || b.tripStart || '9999'));
     try { localStorage.setItem(KEY, JSON.stringify({version:1, entries:next})); entries = next; render(); return true; }
     catch { toast('浏览器空间不足或禁止存储，未保存。请先导出备份，或减少照片。'); return false; }
   }
-  const dateLabel = e => e.start ? `${e.start.replaceAll('-','.')} ${e.end && e.end !== e.start ? '— ' + e.end.replaceAll('-','.') : ''}`.trim() : '日期待补';
+  const dateRange = (start,end) => start.replaceAll('-','.') + (end && end !== start ? ' — ' + end.replaceAll('-','.') : '');
+  const dateLabel = e => e.start ? dateRange(e.start,e.end) : e.tripStart ? '旅行区间 ' + dateRange(e.tripStart,e.tripEnd) : '日期待补';
   function showDialog(id) { $('#' + id).showModal(); }
   $$('[data-close]').forEach(b => b.addEventListener('click', () => $('#' + b.dataset.close).close()));
   $$('dialog').forEach(d => d.addEventListener('click', ev => { if (ev.target === d) { const r = d.getBoundingClientRect(); if (ev.clientX < r.left || ev.clientX > r.right || ev.clientY < r.top || ev.clientY > r.bottom) d.close(); } }));
   function newEntry(point, kind = 'travel') {
     $('#library').close(); $('#reader').close();
+    $('#city-date-context').hidden = true;
     form.reset(); form.elements.id.value = ''; form.elements.kind.value = kind;
     cover = ''; comics = []; renderComics(); updateCover(); $('#form-error').textContent = ''; $('#editor-title').textContent = kind === 'travel' ? '记下一段旅程' : '收藏一个生活片段';
     if (point) { form.elements.lat.value = point.lat.toFixed(4); form.elements.lng.value = point.lng.toFixed(4); }
@@ -56,6 +70,7 @@
   function editEntry(id) {
     const e = entries.find(e => e.id === id); if (!e) return;
     $('#library').close(); form.reset();
+    $('#city-date-context').hidden = !!e.start || !e.tripStart; $('#city-date-context').textContent = '这次旅行的整体区间：' + (e.tripStart ? dateRange(e.tripStart,e.tripEnd) : '') + '。此目的地的具体停留日期待补，可以在下方填写。';
     ['id','kind','title','place','lat','lng','start','end','story','itinerary','tips'].forEach(key => { form.elements[key].value = e[key] ?? ''; });
     cover = e.cover; comics = e.comics.map(c=>({...c})); renderComics(); updateCover(); updateKind(); $('#form-error').textContent = ''; showDialog('editor');
   }
@@ -80,7 +95,7 @@
   form.addEventListener('submit', ev => {
     ev.preventDefault(); if (coverBusy) return;
     try {
-      const fields = Object.fromEntries(new FormData(form)); fields.cover = cover; fields.comics = comics; fields.id ||= crypto.randomUUID(); fields.stops = entries.find(x=>x.id===fields.id)?.stops || [];
+      const fields = Object.fromEntries(new FormData(form)); fields.cover = cover; fields.comics = comics; fields.id ||= crypto.randomUUID(); fields.stops = entries.find(x=>x.id===fields.id)?.stops || []; const metadata = entries.find(x=>x.id===fields.id); if(metadata) for(const key of ['tripId','tripTitle','tripStart','tripEnd']) fields[key] = metadata[key];
       const e = normalizeEntry(fields); const previous = entries.findIndex(x => x.id === e.id); const next = [...entries];
       if (previous < 0) next.push(e); else next[previous] = e;
       if (next.length > 200) throw new Error('当前最多支持 200 篇手记，请先导出归档。');
@@ -156,7 +171,7 @@
   function openReader(id) {
     const e = entries.find(x => x.id === id); if (!e) return;
     const lines = text => text.split('\n').map(s=>s.trim()).filter(Boolean).map(s=>`<li>${esc(s)}</li>`).join('');
-    $('#reader-content').innerHTML = `${e.cover ? `<img class="reader-cover" src="${e.cover}" alt="${esc(e.title)}的封面">` : ''}<div class="reader-body"><p class="eyebrow">${e.kind === 'travel' ? 'A TRAVEL MEMORY' : 'A LITTLE MOMENT'} / BY YANZ</p><h2 id="reader-title">${esc(e.title)}</h2><p class="reader-meta">${esc(e.place || '生活片段')} · ${esc(dateLabel(e))}</p>${comicSection(e)}${e.story ? `<h3>画面之外的文字</h3><div class="story-text">${esc(e.story)}</div>` : '<div class="reserved-block"><span>文字手记 · 待补</span><p>这一段路已经走过，故事慢慢写。</p></div>'}${e.itinerary.trim() ? `<h3>这一路的行程</h3><p class="field-hint">旅行路线与每日安排，慢慢补全。</p><ol>${lines(e.itinerary)}</ol>` : ''}${e.tips.trim() ? `<h3>留给下次的实用笔记</h3><ul>${lines(e.tips)}</ul>` : '<div class="reserved-block"><span>实用攻略 · 待补</span><p>交通、住处、花费与一些想分享的小经验。</p></div>'}${e.kind === 'travel' ? `<button class="text-link" id="locate-entry" data-id="${e.id}">在地图上看看 <span>↗</span></button>` : ''}</div>`;
+    $('#reader-content').innerHTML = `${e.cover ? `<img class="reader-cover" src="${e.cover}" alt="${esc(e.title)}的封面">` : ''}<div class="reader-body"><p class="eyebrow">${e.kind === 'travel' ? 'A TRAVEL MEMORY' : 'A LITTLE MOMENT'} / BY YANZ</p><h2 id="reader-title">${esc(e.title)}</h2><p class="reader-meta">${esc(e.place || '生活片段')} · ${esc(dateLabel(e))}</p>${!e.start && e.tripStart ? '<p class="city-date-note">这是同一次旅行的整体日期区间，此目的地的具体停留日期待补。</p>' : ''}${comicSection(e)}${e.story ? `<h3>画面之外的文字</h3><div class="story-text">${esc(e.story)}</div>` : '<div class="reserved-block"><span>文字手记 · 待补</span><p>这一段路已经走过，故事慢慢写。</p></div>'}${e.itinerary.trim() ? `<h3>这一路的行程</h3><p class="field-hint">旅行路线与每日安排，慢慢补全。</p><ol>${lines(e.itinerary)}</ol>` : ''}${e.tips.trim() ? `<h3>留给下次的实用笔记</h3><ul>${lines(e.tips)}</ul>` : '<div class="reserved-block"><span>实用攻略 · 待补</span><p>交通、住处、花费与一些想分享的小经验。</p></div>'}${e.kind === 'travel' ? `<button class="text-link" id="locate-entry" data-id="${e.id}">在地图上看看 <span>↗</span></button>` : ''}</div>`;
     showDialog('reader'); $('#reader').scrollTop = 0;
     $('#locate-entry')?.addEventListener('click', () => { $('#reader').close(); window.dispatchEvent(new CustomEvent('yanz:focus',{detail:e.id})); focusEntry(e); $('#atlas').scrollIntoView({behavior: 'smooth'}); });
   }

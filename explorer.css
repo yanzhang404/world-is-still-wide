@@ -11,3 +11,4 @@
 @media(max-height:760px) and (min-width:761px){.intro-signature{display:none}}
 @media(max-width:520px){.explorer-intro{top:5%}.explorer-stats{display:none}.explorer-description>span:first-child{display:none}}
 .unwritten-place{font-size:11px;line-height:2;color:#8a9d7e;margin:0 0 7px}
+.city-date-note{font-size:11px;color:#879278;line-height:1.9;background:#edf0e4;border-left:2px solid #bac6a7;padding:10px 13px;margin:0 0 26px}.memory-item small{max-width:130px;overflow:hidden;text-overflow:ellipsis}

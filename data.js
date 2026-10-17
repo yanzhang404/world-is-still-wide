@@ -1,5 +1,5 @@
-// 日期来自 YanZ 本人说明及提供的帖子正文；没有使用发帖日期。
-// 新加坡日期暂依本人回忆；越南日期待补。日本第二段只有共同区间，不推测各城市日期。
+// 各城市／岛屿独立记录。tripStart/tripEnd 是原帖中的共同旅行区间，不推测城市停留日期。
+// 新加坡日期暂按本人回忆；东京日期明确；越南日期待补。
 window.YANZ_ENTRIES = [
   {
     "id": "singapore",
@@ -15,7 +15,11 @@ window.YANZ_ENTRIES = [
     "tips": "",
     "cover": "",
     "comics": [],
-    "stops": []
+    "stops": [],
+    "tripId": "singapore",
+    "tripTitle": "新加坡",
+    "tripStart": "2024-06-07",
+    "tripEnd": "2024-06-09"
   },
   {
     "id": "vladivostok",
@@ -31,44 +35,91 @@ window.YANZ_ENTRIES = [
     "tips": "",
     "cover": "",
     "comics": [],
-    "stops": []
+    "stops": [],
+    "tripId": "vladivostok",
+    "tripTitle": "海参崴",
+    "tripStart": "2024-12-13",
+    "tripEnd": "2024-12-15"
   },
   {
-    "id": "japan",
+    "id": "tokyo",
     "kind": "travel",
-    "title": "东京、名古屋、大阪、京都",
-    "place": "日本",
+    "title": "东京",
+    "place": "日本 · 东京",
     "lat": 35.6762,
     "lng": 139.6503,
     "start": "2024-12-26",
-    "end": "2025-01-03",
+    "end": "2024-12-28",
     "story": "",
-    "itinerary": "2024.12.26–12.28｜东京\n2024.12.29–2025.01.03｜名古屋、大阪、京都（各城市具体日程待补）",
+    "itinerary": "",
     "tips": "",
     "cover": "",
     "comics": [],
-    "stops": [
-      {
-        "name": "东京",
-        "lat": 35.6762,
-        "lng": 139.6503
-      },
-      {
-        "name": "名古屋",
-        "lat": 35.1815,
-        "lng": 136.9066
-      },
-      {
-        "name": "大阪",
-        "lat": 34.6937,
-        "lng": 135.5023
-      },
-      {
-        "name": "京都",
-        "lat": 35.0116,
-        "lng": 135.7681
-      }
-    ]
+    "stops": [],
+    "tripId": "japan",
+    "tripTitle": "东京、名古屋、大阪、京都",
+    "tripStart": "2024-12-26",
+    "tripEnd": "2025-01-03"
+  },
+  {
+    "id": "nagoya",
+    "kind": "travel",
+    "title": "名古屋",
+    "place": "日本 · 名古屋",
+    "lat": 35.1815,
+    "lng": 136.9066,
+    "start": "",
+    "end": "",
+    "story": "",
+    "itinerary": "",
+    "tips": "",
+    "cover": "",
+    "comics": [],
+    "stops": [],
+    "tripId": "japan",
+    "tripTitle": "东京、名古屋、大阪、京都",
+    "tripStart": "2024-12-29",
+    "tripEnd": "2025-01-03"
+  },
+  {
+    "id": "osaka",
+    "kind": "travel",
+    "title": "大阪",
+    "place": "日本 · 大阪",
+    "lat": 34.6937,
+    "lng": 135.5023,
+    "start": "",
+    "end": "",
+    "story": "",
+    "itinerary": "",
+    "tips": "",
+    "cover": "",
+    "comics": [],
+    "stops": [],
+    "tripId": "japan",
+    "tripTitle": "东京、名古屋、大阪、京都",
+    "tripStart": "2024-12-29",
+    "tripEnd": "2025-01-03"
+  },
+  {
+    "id": "kyoto",
+    "kind": "travel",
+    "title": "京都",
+    "place": "日本 · 京都",
+    "lat": 35.0116,
+    "lng": 135.7681,
+    "start": "",
+    "end": "",
+    "story": "",
+    "itinerary": "",
+    "tips": "",
+    "cover": "",
+    "comics": [],
+    "stops": [],
+    "tripId": "japan",
+    "tripTitle": "东京、名古屋、大阪、京都",
+    "tripStart": "2024-12-29",
+    "tripEnd": "2025-01-03"
   },
   {
     "id": "cambodia",
@@ -84,7 +135,11 @@ window.YANZ_ENTRIES = [
     "tips": "",
     "cover": "",
     "comics": [],
-    "stops": []
+    "stops": [],
+    "tripId": "cambodia",
+    "tripTitle": "暹粒",
+    "tripStart": "2025-05-01",
+    "tripEnd": "2025-05-04"
   },
   {
     "kind": "travel",
@@ -100,7 +155,11 @@ window.YANZ_ENTRIES = [
     "lng": 114.1694,
     "start": "2026-01-02",
     "end": "2026-01-04",
-    "itinerary": ""
+    "itinerary": "",
+    "tripId": "hongkong",
+    "tripTitle": "香港",
+    "tripStart": "2026-01-02",
+    "tripEnd": "2026-01-04"
   },
   {
     "kind": "travel",
@@ -108,26 +167,19 @@ window.YANZ_ENTRIES = [
     "tips": "",
     "cover": "",
     "comics": [],
-    "stops": [
-      {
-        "name": "普吉岛",
-        "lat": 7.8804,
-        "lng": 98.3923
-      },
-      {
-        "name": "曼谷",
-        "lat": 13.7563,
-        "lng": 100.5018
-      }
-    ],
-    "id": "thailand-south",
-    "title": "普吉岛、曼谷",
-    "place": "泰国 · 普吉岛 / 曼谷",
+    "stops": [],
+    "id": "phuket",
+    "title": "普吉岛",
+    "place": "泰国 · 普吉岛",
     "lat": 7.8804,
     "lng": 98.3923,
-    "start": "2026-01-05",
-    "end": "2026-01-10",
-    "itinerary": "普吉岛\n曼谷"
+    "start": "",
+    "end": "",
+    "itinerary": "",
+    "tripId": "thailand-south",
+    "tripTitle": "普吉岛、曼谷",
+    "tripStart": "2026-01-05",
+    "tripEnd": "2026-01-10"
   },
   {
     "kind": "travel",
@@ -135,26 +187,59 @@ window.YANZ_ENTRIES = [
     "tips": "",
     "cover": "",
     "comics": [],
-    "stops": [
-      {
-        "name": "清迈",
-        "lat": 18.7883,
-        "lng": 98.9853
-      },
-      {
-        "name": "清莱",
-        "lat": 19.9105,
-        "lng": 99.8406
-      }
-    ],
-    "id": "thailand-north",
-    "title": "清迈、清莱",
-    "place": "泰国 · 清迈 / 清莱",
+    "stops": [],
+    "id": "bangkok",
+    "title": "曼谷",
+    "place": "泰国 · 曼谷",
+    "lat": 13.7563,
+    "lng": 100.5018,
+    "start": "",
+    "end": "",
+    "itinerary": "",
+    "tripId": "thailand-south",
+    "tripTitle": "普吉岛、曼谷",
+    "tripStart": "2026-01-05",
+    "tripEnd": "2026-01-10"
+  },
+  {
+    "kind": "travel",
+    "story": "",
+    "tips": "",
+    "cover": "",
+    "comics": [],
+    "stops": [],
+    "id": "chiang-mai",
+    "title": "清迈",
+    "place": "泰国 · 清迈",
     "lat": 18.7883,
     "lng": 98.9853,
-    "start": "2026-01-11",
-    "end": "2026-01-14",
-    "itinerary": "清迈\n清莱"
+    "start": "",
+    "end": "",
+    "itinerary": "",
+    "tripId": "thailand-north",
+    "tripTitle": "清迈、清莱",
+    "tripStart": "2026-01-11",
+    "tripEnd": "2026-01-14"
+  },
+  {
+    "kind": "travel",
+    "story": "",
+    "tips": "",
+    "cover": "",
+    "comics": [],
+    "stops": [],
+    "id": "chiang-rai",
+    "title": "清莱",
+    "place": "泰国 · 清莱",
+    "lat": 19.9105,
+    "lng": 99.8406,
+    "start": "",
+    "end": "",
+    "itinerary": "",
+    "tripId": "thailand-north",
+    "tripTitle": "清迈、清莱",
+    "tripStart": "2026-01-11",
+    "tripEnd": "2026-01-14"
   },
   {
     "id": "bohol",
@@ -170,80 +255,170 @@ window.YANZ_ENTRIES = [
     "tips": "",
     "cover": "",
     "comics": [],
-    "stops": []
+    "stops": [],
+    "tripId": "bohol",
+    "tripTitle": "薄荷岛",
+    "tripStart": "2026-05-01",
+    "tripEnd": "2026-05-04"
   },
   {
-    "id": "indonesia",
+    "id": "jakarta",
     "kind": "travel",
-    "title": "雅加达、巴厘岛、科摩多岛",
-    "place": "印度尼西亚",
+    "title": "雅加达",
+    "place": "印度尼西亚 · 雅加达",
     "lat": -6.2088,
     "lng": 106.8456,
-    "start": "2026-06-19",
-    "end": "2026-06-28",
-    "story": "",
-    "itinerary": "雅加达\n巴厘岛\n科摩多岛",
-    "tips": "",
-    "cover": "",
-    "comics": [],
-    "stops": [
-      {
-        "name": "雅加达",
-        "lat": -6.2088,
-        "lng": 106.8456
-      },
-      {
-        "name": "巴厘岛",
-        "lat": -8.4095,
-        "lng": 115.1889
-      },
-      {
-        "name": "科摩多岛",
-        "lat": -8.55,
-        "lng": 119.4833
-      }
-    ]
-  },
-  {
-    "id": "vietnam",
-    "kind": "travel",
-    "title": "越南，一路慢慢走",
-    "place": "越南",
-    "lat": 16.0471,
-    "lng": 108.2068,
     "start": "",
     "end": "",
     "story": "",
-    "itinerary": "胡志明市\n大叻\n岘港\n会安\n河内",
+    "itinerary": "",
     "tips": "",
     "cover": "",
     "comics": [],
-    "stops": [
-      {
-        "name": "胡志明市",
-        "lat": 10.8231,
-        "lng": 106.6297
-      },
-      {
-        "name": "大叻",
-        "lat": 11.9404,
-        "lng": 108.4583
-      },
-      {
-        "name": "岘港",
-        "lat": 16.0544,
-        "lng": 108.2022
-      },
-      {
-        "name": "会安",
-        "lat": 15.8801,
-        "lng": 108.338
-      },
-      {
-        "name": "河内",
-        "lat": 21.0278,
-        "lng": 105.8342
-      }
-    ]
+    "stops": [],
+    "tripId": "indonesia",
+    "tripTitle": "雅加达、巴厘岛、科摩多岛",
+    "tripStart": "2026-06-19",
+    "tripEnd": "2026-06-28"
+  },
+  {
+    "id": "bali",
+    "kind": "travel",
+    "title": "巴厘岛",
+    "place": "印度尼西亚 · 巴厘岛",
+    "lat": -8.4095,
+    "lng": 115.1889,
+    "start": "",
+    "end": "",
+    "story": "",
+    "itinerary": "",
+    "tips": "",
+    "cover": "",
+    "comics": [],
+    "stops": [],
+    "tripId": "indonesia",
+    "tripTitle": "雅加达、巴厘岛、科摩多岛",
+    "tripStart": "2026-06-19",
+    "tripEnd": "2026-06-28"
+  },
+  {
+    "id": "komodo",
+    "kind": "travel",
+    "title": "科摩多岛",
+    "place": "印度尼西亚 · 科摩多岛",
+    "lat": -8.55,
+    "lng": 119.4833,
+    "start": "",
+    "end": "",
+    "story": "",
+    "itinerary": "",
+    "tips": "",
+    "cover": "",
+    "comics": [],
+    "stops": [],
+    "tripId": "indonesia",
+    "tripTitle": "雅加达、巴厘岛、科摩多岛",
+    "tripStart": "2026-06-19",
+    "tripEnd": "2026-06-28"
+  },
+  {
+    "id": "ho-chi-minh",
+    "kind": "travel",
+    "title": "胡志明市",
+    "place": "越南 · 胡志明市",
+    "lat": 10.8231,
+    "lng": 106.6297,
+    "start": "",
+    "end": "",
+    "story": "",
+    "itinerary": "",
+    "tips": "",
+    "cover": "",
+    "comics": [],
+    "stops": [],
+    "tripId": "vietnam",
+    "tripTitle": "越南，一路慢慢走",
+    "tripStart": "",
+    "tripEnd": ""
+  },
+  {
+    "id": "da-lat",
+    "kind": "travel",
+    "title": "大叻",
+    "place": "越南 · 大叻",
+    "lat": 11.9404,
+    "lng": 108.4583,
+    "start": "",
+    "end": "",
+    "story": "",
+    "itinerary": "",
+    "tips": "",
+    "cover": "",
+    "comics": [],
+    "stops": [],
+    "tripId": "vietnam",
+    "tripTitle": "越南，一路慢慢走",
+    "tripStart": "",
+    "tripEnd": ""
+  },
+  {
+    "id": "da-nang",
+    "kind": "travel",
+    "title": "岘港",
+    "place": "越南 · 岘港",
+    "lat": 16.0544,
+    "lng": 108.2022,
+    "start": "",
+    "end": "",
+    "story": "",
+    "itinerary": "",
+    "tips": "",
+    "cover": "",
+    "comics": [],
+    "stops": [],
+    "tripId": "vietnam",
+    "tripTitle": "越南，一路慢慢走",
+    "tripStart": "",
+    "tripEnd": ""
+  },
+  {
+    "id": "hoi-an",
+    "kind": "travel",
+    "title": "会安",
+    "place": "越南 · 会安",
+    "lat": 15.8801,
+    "lng": 108.338,
+    "start": "",
+    "end": "",
+    "story": "",
+    "itinerary": "",
+    "tips": "",
+    "cover": "",
+    "comics": [],
+    "stops": [],
+    "tripId": "vietnam",
+    "tripTitle": "越南，一路慢慢走",
+    "tripStart": "",
+    "tripEnd": ""
+  },
+  {
+    "id": "hanoi",
+    "kind": "travel",
+    "title": "河内",
+    "place": "越南 · 河内",
+    "lat": 21.0278,
+    "lng": 105.8342,
+    "start": "",
+    "end": "",
+    "story": "",
+    "itinerary": "",
+    "tips": "",
+    "cover": "",
+    "comics": [],
+    "stops": [],
+    "tripId": "vietnam",
+    "tripTitle": "越南，一路慢慢走",
+    "tripStart": "",
+    "tripEnd": ""
   }
 ];
