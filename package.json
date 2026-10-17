@@ -6,6 +6,6 @@
   "scripts": {
     "dev": "node server.mjs",
     "start": "node server.mjs",
-    "check": "node --check app.js && node --check data.js && node --check server.mjs"
+    "check": "node --check app.js && node --check globe.js && node --check data.js && node --check server.mjs"
   }
 }

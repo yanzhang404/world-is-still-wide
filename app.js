@@ -158,7 +158,7 @@
     const lines = text => text.split('\n').map(s=>s.trim()).filter(Boolean).map(s=>`<li>${esc(s)}</li>`).join('');
     $('#reader-content').innerHTML = `${e.cover ? `<img class="reader-cover" src="${e.cover}" alt="${esc(e.title)}的封面">` : ''}<div class="reader-body"><p class="eyebrow">${e.kind === 'travel' ? 'A TRAVEL MEMORY' : 'A LITTLE MOMENT'} / BY YANZ</p><h2 id="reader-title">${esc(e.title)}</h2><p class="reader-meta">${esc(e.place || '生活片段')} · ${esc(dateLabel(e))}</p>${comicSection(e)}${e.story ? `<h3>画面之外的文字</h3><div class="story-text">${esc(e.story)}</div>` : '<div class="reserved-block"><span>文字手记 · 待补</span><p>这一段路已经走过，故事慢慢写。</p></div>'}${e.itinerary.trim() ? `<h3>这一路的行程</h3><p class="field-hint">旅行路线与每日安排，慢慢补全。</p><ol>${lines(e.itinerary)}</ol>` : ''}${e.tips.trim() ? `<h3>留给下次的实用笔记</h3><ul>${lines(e.tips)}</ul>` : '<div class="reserved-block"><span>实用攻略 · 待补</span><p>交通、住处、花费与一些想分享的小经验。</p></div>'}${e.kind === 'travel' ? `<button class="text-link" id="locate-entry" data-id="${e.id}">在地图上看看 <span>↗</span></button>` : ''}</div>`;
     showDialog('reader'); $('#reader').scrollTop = 0;
-    $('#locate-entry')?.addEventListener('click', () => { $('#reader').close(); focusEntry(e); $('#atlas').scrollIntoView({behavior: 'smooth'}); });
+    $('#locate-entry')?.addEventListener('click', () => { $('#reader').close(); window.dispatchEvent(new CustomEvent('yanz:focus',{detail:e.id})); focusEntry(e); $('#atlas').scrollIntoView({behavior: 'smooth'}); });
   }
   function render() {
     const trips = entries.filter(e => e.kind === 'travel');
@@ -171,6 +171,7 @@
     $('#first-note')?.addEventListener('click', () => newEntry(null,filter === 'life' ? 'life' : 'travel'));
     $$('.journal-card').forEach(b => b.addEventListener('click', () => openReader(b.dataset.id)));
     renderPins(); renderLibrary();
+    window.dispatchEvent(new CustomEvent('yanz:entries',{detail:entries}));
   }
   $$('.journal-filters button').forEach(b => b.addEventListener('click', () => { filter = b.dataset.filter; $$('.journal-filters button').forEach(other => { other.classList.toggle('active',other === b); other.setAttribute('aria-pressed',other === b); }); render(); }));
   const project = (lng, lat) => [((lng + 180) / 360) * 1000, ((90 - lat) / 180) * 500];
@@ -224,6 +225,7 @@
     const p = svgEl('circle',{cx:pt.x,cy:pt.y,r:4/Math.sqrt(zoom),fill:'#c97853',stroke:'#fffdf4','stroke-width':2/zoom}); $('#selected-pin').replaceChildren(p);
   });
   $('#year').textContent = new Date().getFullYear();
-  render(); loadMap();
+  window.YANZ_API = {getEntries:()=>entries,openEntry:openReader,newEntry};
+  render(); if(!document.body.classList.contains('immersive')) loadMap();
 })();
 
