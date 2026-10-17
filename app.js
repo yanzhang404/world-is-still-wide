@@ -41,11 +41,20 @@
     if (new Set(result.map(e => e.id)).size !== result.length) throw new Error('手记编号重复，无法导入。');
     return result.sort((a,b)=>(a.start || a.tripStart || '9999').localeCompare(b.start || b.tripStart || '9999'));
   }
-  try { const saved = localStorage.getItem(KEY); entries = readEntries(saved ? JSON.parse(saved).entries : window.YANZ_ENTRIES || []); }
+  try {
+    const saved=localStorage.getItem(KEY), snapshot=saved?JSON.parse(saved):null;
+    entries=readEntries(snapshot?snapshot.entries:window.YANZ_ENTRIES || []);
+    if(snapshot){
+      const legacyIds=['singapore','vladivostok','japan','tokyo','nagoya','osaka','kyoto','cambodia','hongkong','thailand-south','phuket','bangkok','thailand-north','chiang-mai','chiang-rai','bohol','indonesia','jakarta','bali','komodo','vietnam','ho-chi-minh','da-lat','da-nang','hoi-an','hanoi'];
+      const known=new Set(Array.isArray(snapshot.sourceIds)?snapshot.sourceIds:legacyIds), existing=new Set(entries.map(e=>e.id));
+      const additions=(window.YANZ_ENTRIES || []).filter(e=>!known.has(e.id)&&!existing.has(e.id));
+      entries=readEntries([...entries,...additions]);
+    }
+  }
   catch { try { entries = readEntries(window.YANZ_ENTRIES || []); } catch { entries = []; } setTimeout(() => toast('本地草稿无法读取，已展示发布版本。原草稿未覆盖。'), 500); }
   function commit(next) {
     next = [...next].sort((a,b)=>(a.start || a.tripStart || '9999').localeCompare(b.start || b.tripStart || '9999'));
-    try { localStorage.setItem(KEY, JSON.stringify({version:1, entries:next})); entries = next; render(); return true; }
+    try { localStorage.setItem(KEY, JSON.stringify({version:1, entries:next, sourceIds:(window.YANZ_ENTRIES || []).map(e=>e.id)})); entries = next; render(); return true; }
     catch { toast('浏览器空间不足或禁止存储，未保存。请先导出备份，或减少照片。'); return false; }
   }
   const dateRange = (start,end) => start.replaceAll('-','.') + (end && end !== start ? ' — ' + end.replaceAll('-','.') : '');
@@ -144,34 +153,33 @@
   });
 
   function renderComics() {
-    $('#comic-previews').innerHTML = comics.map((c,i)=>`<div class="comic-preview"><img src="${c.image}" alt="第 ${i+1} 张漫画"><div><label>第 ${i+1} 张的短注<input class="comic-caption" data-index="${i}" maxlength="300" value="${esc(c.caption)}" placeholder="一句话，留给这个画面"></label><button type="button" class="text-link" data-remove-comic="${i}">移除这一张 ×</button></div></div>`).join('');
+    $('#comic-previews').innerHTML = comics.map((c,i)=>`<div class="comic-preview"><img src="${c.image}" alt="第 ${i+1} 张图片"><div><label>第 ${i+1} 张的短注<input class="comic-caption" data-index="${i}" maxlength="300" value="${esc(c.caption)}" placeholder="一句话，留给这个画面"></label><button type="button" class="text-link" data-remove-comic="${i}">移除这一张 ×</button></div></div>`).join('');
     $('#comic-input').value = '';
   }
   $('#comic-previews').addEventListener('input',ev=>{if(ev.target.classList.contains('comic-caption')) comics[Number(ev.target.dataset.index)].caption=ev.target.value});
   $('#comic-previews').addEventListener('click',ev=>{const b=ev.target.closest('[data-remove-comic]');if(b){comics.splice(Number(b.dataset.removeComic),1);renderComics()}});
   $('#comic-input').addEventListener('change', async ev=>{
     const files=[...ev.target.files]; if(!files.length)return;
-    if(comics.length+files.length>6){toast('一篇手记最多放 6 张漫画。');ev.target.value='';return}
+    if(comics.length+files.length>6){toast('一篇手记最多放 6 张图片。');ev.target.value='';return}
     coverBusy=true; $('#save-entry').disabled=true;
     try {
       const added=[];
       for(const file of files){
-        if(!['image/jpeg','image/png','image/webp'].includes(file.type)||file.size>15*1024*1024)throw new Error('请选择 15MB 以内的 JPG、PNG 或 WebP 漫画。');
-        const bitmap=await createImageBitmap(file); const ratio=Math.min(1,1600/Math.max(bitmap.width,bitmap.height)); const canvas=document.createElement('canvas');canvas.width=Math.round(bitmap.width*ratio);canvas.height=Math.round(bitmap.height*ratio);const ctx=canvas.getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,canvas.width,canvas.height);ctx.drawImage(bitmap,0,0,canvas.width,canvas.height);bitmap.close();const image=canvas.toDataURL('image/jpeg',.85);if(image.length>1750000)throw new Error('漫画图片过大，请缩小后再上传。');added.push({image,caption:''});
+        if(!['image/jpeg','image/png','image/webp'].includes(file.type)||file.size>15*1024*1024)throw new Error('请选择 15MB 以内的 JPG、PNG 或 WebP 图片。');
+        const bitmap=await createImageBitmap(file); const ratio=Math.min(1,1600/Math.max(bitmap.width,bitmap.height)); const canvas=document.createElement('canvas');canvas.width=Math.round(bitmap.width*ratio);canvas.height=Math.round(bitmap.height*ratio);const ctx=canvas.getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,canvas.width,canvas.height);ctx.drawImage(bitmap,0,0,canvas.width,canvas.height);bitmap.close();const image=canvas.toDataURL('image/jpeg',.85);if(image.length>1750000)throw new Error('图片过大，请缩小后再上传。');added.push({image,caption:''});
       }
       comics.push(...added);renderComics();
     }catch(err){toast(err.message)}finally{coverBusy=false;$('#save-entry').disabled=false}
   });
   function comicSection(e) {
-    if(e.comics.length)return '<section class="comic-reading"><p class="eyebrow">THE STORY, IN FRAMES</p><h3>让画面，先说一会儿。</h3><div class="comic-pages">'+e.comics.map((c,i)=>`<figure><img src="${c.image}" alt="${esc(c.caption || '旅行漫画第 '+(i+1)+' 页')}" loading="lazy">${c.caption?'<figcaption>'+esc(c.caption)+'</figcaption>':''}</figure>`).join('')+'</div></section>';
-    if(e.kind==='life')return '';
-    return '<section class="comic-reading"><p class="eyebrow">A STORY WAITING TO BE DRAWN</p><h3>这一站的漫画，留一页空白。</h3><div class="comic-empty"><div><span>01</span><svg class="icon"><use href="#i-sun"/></svg><small>开场 · 一眼风景</small></div><div><span>02</span><svg class="icon"><use href="#i-pin"/></svg><small>途中 · 一个瞬间</small></div><div><span>03</span><svg class="icon"><use href="#i-book"/></svg><small>回望 · 一句心情</small></div></div><p class="field-hint">漫画留住画面，短文补上感受。等你慢慢画，慢慢写。</p></section>';
+    if(!e.comics.length)return '';
+    return '<section class="comic-reading"><p class="eyebrow">MOMENTS IN FRAMES</p><h3>沿途的画面</h3><div class="comic-pages">'+e.comics.map((c,i)=>`<figure><img src="${c.image}" alt="${esc(c.caption || '图片 '+(i+1))}" loading="lazy">${c.caption?'<figcaption>'+esc(c.caption)+'</figcaption>':''}</figure>`).join('')+'</div></section>';
   }
 
   function openReader(id) {
     const e = entries.find(x => x.id === id); if (!e) return;
     const lines = text => text.split('\n').map(s=>s.trim()).filter(Boolean).map(s=>`<li>${esc(s)}</li>`).join('');
-    $('#reader-content').innerHTML = `${e.cover ? `<img class="reader-cover" src="${e.cover}" alt="${esc(e.title)}的封面">` : ''}<div class="reader-body"><p class="eyebrow">${e.kind === 'travel' ? 'A TRAVEL MEMORY' : 'A LITTLE MOMENT'} / BY YANZ</p><h2 id="reader-title">${esc(e.title)}</h2><p class="reader-meta">${esc(e.place || '生活片段')} · ${esc(dateLabel(e))}</p>${!e.start && e.tripStart ? '<p class="city-date-note">这是同一次旅行的整体日期区间，此目的地的具体停留日期待补。</p>' : ''}${comicSection(e)}${e.story ? `<h3>画面之外的文字</h3><div class="story-text">${esc(e.story)}</div>` : '<div class="reserved-block"><span>文字手记 · 待补</span><p>这一段路已经走过，故事慢慢写。</p></div>'}${e.itinerary.trim() ? `<h3>这一路的行程</h3><p class="field-hint">旅行路线与每日安排，慢慢补全。</p><ol>${lines(e.itinerary)}</ol>` : ''}${e.tips.trim() ? `<h3>留给下次的实用笔记</h3><ul>${lines(e.tips)}</ul>` : '<div class="reserved-block"><span>实用攻略 · 待补</span><p>交通、住处、花费与一些想分享的小经验。</p></div>'}${e.kind === 'travel' ? `<button class="text-link" id="locate-entry" data-id="${e.id}">在地图上看看 <span>↗</span></button>` : ''}</div>`;
+    $('#reader-content').innerHTML = `${e.cover ? `<img class="reader-cover" src="${e.cover}" alt="${esc(e.title)}的封面">` : ''}<div class="reader-body"><p class="eyebrow">${e.kind === 'travel' ? 'A TRAVEL MEMORY' : 'A LITTLE MOMENT'} / BY YANZ</p><h2 id="reader-title">${esc(e.title)}</h2><p class="reader-meta">${esc(e.place || '生活片段')} · ${esc(dateLabel(e))}</p>${!e.start && e.tripStart ? '<p class="city-date-note">这是同一次旅行的整体日期区间，此目的地的具体停留日期待补。</p>' : ''}${comicSection(e)}${e.story ? `<h3>这一站的手记</h3><div class="story-text">${esc(e.story)}</div>` : '<div class="reserved-block"><span>文字手记 · 待补</span><p>这一段路已经走过，故事慢慢写。</p></div>'}${e.itinerary.trim() ? `<h3>这一路的行程</h3><p class="field-hint">旅行路线与每日安排，慢慢补全。</p><ol>${lines(e.itinerary)}</ol>` : ''}${e.tips.trim() ? `<h3>留给下次的实用笔记</h3><ul>${lines(e.tips)}</ul>` : '<div class="reserved-block"><span>实用攻略 · 待补</span><p>交通、住处、花费与一些想分享的小经验。</p></div>'}${e.kind === 'travel' ? `<button class="text-link" id="locate-entry" data-id="${e.id}">在地图上看看 <span>↗</span></button>` : ''}</div>`;
     showDialog('reader'); $('#reader').scrollTop = 0;
     $('#locate-entry')?.addEventListener('click', () => { $('#reader').close(); window.dispatchEvent(new CustomEvent('yanz:focus',{detail:e.id})); focusEntry(e); $('#atlas').scrollIntoView({behavior: 'smooth'}); });
   }

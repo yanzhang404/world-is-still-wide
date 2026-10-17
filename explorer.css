@@ -12,3 +12,8 @@
 @media(max-width:520px){.explorer-intro{top:5%}.explorer-stats{display:none}.explorer-description>span:first-child{display:none}}
 .unwritten-place{font-size:11px;line-height:2;color:#8a9d7e;margin:0 0 7px}
 .city-date-note{font-size:11px;color:#879278;line-height:1.9;background:#edf0e4;border-left:2px solid #bac6a7;padding:10px 13px;margin:0 0 26px}.memory-item small{max-width:130px;overflow:hidden;text-overflow:ellipsis}
+.globe-controls output{display:block;min-width:27px;text-align:center;font-size:8px;letter-spacing:.2px;color:#8fa57f;line-height:20px}.globe-controls button:disabled{opacity:.3;cursor:default}.explorer-intro{transition:opacity .35s,transform .35s}.explorer-stage.zoomed .explorer-intro{opacity:0;transform:translateY(-12px)}.explorer-stage.zoomed .planet-label{opacity:.45}
+@media(max-width:520px){.explorer-description>span:first-child{display:inline}.globe-controls output{font-size:7px;line-height:15px;min-width:24px}}
+.explorer-stage.zoomed .explorer-intro{animation:none}
+.country-panel{top:12%;max-height:76%;display:flex;flex-direction:column}.country-panel #country-panel-list{min-height:0;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:#526a43 transparent}
+@media(max-width:760px){.country-panel{top:16%;max-height:76%}}
