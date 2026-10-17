@@ -4,7 +4,7 @@
   const canvas=$('#travel-globe'), ctx=canvas.getContext('2d'), stage=$('#explorer');
   const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const MIN_ZOOM=.72, MAX_ZOOM=24, pointers=new Map(); let pinchState=null;
+  const MIN_ZOOM=.72, MAX_ZOOM=24, pointers=new Map(); let pinchState=null, mapInteracting=false, mapVisible=true, destinationScope='all', destinationQuery='';
   let entries=window.YANZ_API.getEntries(), countries=[], points=[], w=0,h=0,cx=0,cy=0,r=0,dpr=1,magnification=1;
   let rotation=[-110,-18,0], auto=!reduced, dragging=false, pointerStart=null, moved=false, hovered=null, hoverCountry=null, activeId=null, flight=null, lastTime=0, elapsed=0, ripple=null;
   const projection=d3.geoOrthographic().clipAngle(90).precision(.55);
@@ -28,7 +28,17 @@
     projection.rotate(rotation);
   }
   function setZoom(value,coordinate=null,screen=null){if(!Number.isFinite(value))return;setAuto(false);flight=null;magnification=Math.max(MIN_ZOOM,Math.min(MAX_ZOOM,value));updateProjection();if(coordinate&&screen)keepAnchor(coordinate,screen);updateZoomUI();hideTooltip()}
-  function updateEntries(next){entries=next;points=[];entries.filter(e=>e.kind==='travel').forEach((e,index)=>{const stops=e.stops.length?e.stops:[{name:e.place,lat:e.lat,lng:e.lng}];stops.forEach((stop,i)=>points.push({...stop,entry:e,index:index+1,primary:i===0}))});$('#explorer-destination-count').textContent=points.length;$('#dock-total').textContent=entries.length+' MEMORIES';$('#memory-track').innerHTML=entries.map((e,i)=>`<button class="memory-item${activeId===e.id?' active':''}" data-id="${e.id}" aria-label="${esc(e.title)}，${esc(date(e))}"><span class="memory-index">${String(i+1).padStart(2,'0')}</span><span class="memory-item-content"><h3>${esc(e.title)}</h3><small>${esc(shortDate(e))}</small></span><span class="memory-arrow">↗</span></button>`).join('');$$('.memory-item').forEach(b=>{b.addEventListener('mouseenter',()=>{activeId=b.dataset.id});b.addEventListener('focus',()=>{activeId=b.dataset.id});b.addEventListener('click',()=>openEntry(b.dataset.id))});}
+  function isDomestic(e){return e.kind==='travel'&&e.place.startsWith('中国')}
+  function renderDestinations(){
+    const query=destinationQuery.trim().toLocaleLowerCase();
+    const visible=entries.filter(e=>(destinationScope==='all'||(destinationScope==='domestic'?isDomestic(e):e.kind==='travel'&&!isDomestic(e)))&&(!query||(e.title+' '+e.place).toLocaleLowerCase().includes(query)));
+    $('#dock-total').textContent=visible.length===entries.length?entries.length+' PLACES':visible.length+' / '+entries.length+' PLACES';
+    $$('.destination-filters button').forEach(b=>{b.classList.toggle('active',b.dataset.scope===destinationScope);b.setAttribute('aria-pressed',String(b.dataset.scope===destinationScope));const count=b.dataset.scope==='all'?entries.length:entries.filter(e=>b.dataset.scope==='domestic'?isDomestic(e):e.kind==='travel'&&!isDomestic(e)).length;b.querySelector('.filter-count').textContent=count});
+    $('#memory-track').innerHTML=visible.length?visible.map(e=>{const i=entries.indexOf(e);return `<button class="memory-item${activeId===e.id?' active':''}" data-id="${e.id}" aria-label="${esc(e.title)}，${esc(date(e))}"><span class="memory-index">${String(i+1).padStart(2,'0')}</span><span class="memory-item-content"><h3>${esc(e.title)}</h3><small>${esc(shortDate(e))}</small></span><span class="memory-arrow">↗</span></button>`}).join(''):'<p class="destinations-empty" role="status">暂时没有匹配的地方，换个关键词试试。</p>';
+    $$('.memory-item').forEach(b=>{b.addEventListener('mouseenter',()=>{activeId=b.dataset.id});b.addEventListener('focus',()=>{activeId=b.dataset.id});b.addEventListener('click',()=>openEntry(b.dataset.id))});
+  }
+  function updateEntries(next){entries=next;points=[];entries.filter(e=>e.kind==='travel').forEach((e,index)=>{const stops=e.stops.length?e.stops:[{name:e.place,lat:e.lat,lng:e.lng}];stops.forEach((stop,i)=>points.push({...stop,entry:e,index:index+1,primary:i===0}))});$('#explorer-destination-count').textContent=points.length;renderDestinations()}
+  function setMapInteraction(value){mapInteracting=value;stage.classList.toggle('map-interacting',value);const button=$('#map-interaction-toggle');button.setAttribute('aria-pressed',String(value));button.textContent=value?'完成':'探索';button.setAttribute('aria-label',value?'完成地图探索，返回页面浏览':'进入地图自由探索模式');$('#map-gesture-hint').hidden=!value;if(value){setAuto(false);hideTooltip()}}
   function setAuto(value){auto=value;$('#globe-rotate').setAttribute('aria-pressed',String(auto));$('#globe-rotate').setAttribute('aria-label',auto?'暂停自动旋转':'开启自动旋转')}
   function flyTo(e){if(e.kind!=='travel')return;setAuto(false);flight={start:performance.now(),from:[...rotation],to:[-e.lng,-Math.max(-55,Math.min(55,e.lat)),0]};activeId=e.id;$$('.memory-item').forEach(b=>b.classList.toggle('active',b.dataset.id===e.id))}
   function openEntry(id){const entry=entries.find(e=>e.id===id);if(!entry)return;flyTo(entry);$('#country-panel').hidden=true;hideTooltip();api.openEntry(id)}
@@ -43,11 +53,11 @@
   function xy(ev){const box=canvas.getBoundingClientRect();return[ev.clientX-box.left,ev.clientY-box.top]}
   canvas.addEventListener('pointerdown',ev=>{if(ev.button!==0)return;const[x,y]=xy(ev);pointers.set(ev.pointerId,[x,y]);canvas.setPointerCapture(ev.pointerId);flight=null;
     if(pointers.size>=2){const[a,b]=[...pointers.values()];const midpoint=[(a[0]+b[0])/2,(a[1]+b[1])/2];pinchState={distance:Math.max(1,Math.hypot(a[0]-b[0],a[1]-b[1])),zoom:magnification,coordinate:Math.hypot(midpoint[0]-cx,midpoint[1]-cy)<r*magnification?projection.invert(midpoint):null};pointerStart=null;dragging=true;moved=true;setAuto(false);hideTooltip()}
-    else{pointerStart={x,y,lastX:x,lastY:y};dragging=true;moved=false}canvas.classList.add('dragging');
+    else{pointerStart={x,y,lastX:x,lastY:y,pointerType:ev.pointerType};dragging=true;moved=false}canvas.classList.add('dragging');
   });
   canvas.addEventListener('pointermove',ev=>{const[x,y]=xy(ev);if(pointers.has(ev.pointerId))pointers.set(ev.pointerId,[x,y]);
     if(pinchState&&pointers.size>=2){const[a,b]=[...pointers.values()];const midpoint=[(a[0]+b[0])/2,(a[1]+b[1])/2],distance=Math.hypot(a[0]-b[0],a[1]-b[1]);setZoom(pinchState.zoom*distance/pinchState.distance,pinchState.coordinate,midpoint);moved=true;return}
-    if(dragging&&pointerStart){const dx=x-pointerStart.lastX,dy=y-pointerStart.lastY;if(Math.hypot(x-pointerStart.x,y-pointerStart.y)>4)moved=true;if(moved){setAuto(false);rotation[0]+=dx*.27/magnification;rotation[1]=Math.max(-85,Math.min(85,rotation[1]-dy*.27/magnification));updateProjection();hideTooltip()}pointerStart.lastX=x;pointerStart.lastY=y;return}
+    if(dragging&&pointerStart){if(ev.pointerType==='touch'&&!mapInteracting){const horizontal=Math.abs(x-pointerStart.x),vertical=Math.abs(y-pointerStart.y);if(Math.hypot(horizontal,vertical)<8)return;if(vertical>=horizontal){moved=true;return}}const dx=x-pointerStart.lastX,dy=y-pointerStart.lastY;if(Math.hypot(x-pointerStart.x,y-pointerStart.y)>4)moved=true;if(moved){setAuto(false);rotation[0]+=dx*.27/magnification;rotation[1]=Math.max(-85,Math.min(85,rotation[1]-dy*.27/magnification));updateProjection();hideTooltip()}pointerStart.lastX=x;pointerStart.lastY=y;return}
     if(document.querySelector('dialog[open]'))return;const p=hitPoint(x,y);if(p){tooltip(p,x,y);hoverCountry=null}else{hideTooltip();const country=countryAt(x,y);if(country&&countryTrips(country).length){hoverCountry=country;canvas.style.cursor='pointer'}}
   });
   canvas.addEventListener('pointerup',ev=>{const wasPinching=!!pinchState;pointers.delete(ev.pointerId);if(wasPinching){pinchState=null;moved=true;const remaining=[...pointers.values()][0];if(remaining){pointerStart={x:remaining[0],y:remaining[1],lastX:remaining[0],lastY:remaining[1]};dragging=true}else{pointerStart=null;dragging=false;canvas.classList.remove('dragging')}return}
@@ -55,17 +65,23 @@
   });
   canvas.addEventListener('pointercancel',ev=>{pointers.delete(ev.pointerId);pinchState=null;dragging=false;pointerStart=null;canvas.classList.remove('dragging')});
   canvas.addEventListener('pointerleave',()=>{if(!dragging)hideTooltip()});
-  canvas.addEventListener('wheel',ev=>{ev.preventDefault();const point=xy(ev),near=hitPoint(point[0],point[1]),coordinate=near?[near.lng,near.lat]:Math.hypot(point[0]-cx,point[1]-cy)<r*magnification?projection.invert(point):null;const delta=ev.deltaY*(ev.deltaMode===1?16:ev.deltaMode===2?h:1);setZoom(magnification*Math.exp(Math.max(-1.5,Math.min(1.5,-delta*.001))),coordinate,point)},{passive:false});
+  canvas.addEventListener('wheel',ev=>{if(!ev.ctrlKey&&!ev.metaKey&&!mapInteracting){hideTooltip();return}ev.preventDefault();const point=xy(ev),near=hitPoint(point[0],point[1]),coordinate=near?[near.lng,near.lat]:Math.hypot(point[0]-cx,point[1]-cy)<r*magnification?projection.invert(point):null;const delta=ev.deltaY*(ev.deltaMode===1?16:ev.deltaMode===2?h:1);setZoom(magnification*Math.exp(Math.max(-1.5,Math.min(1.5,-delta*.001))),coordinate,point)},{passive:false});
   canvas.addEventListener('keydown',ev=>{const keys=['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','+','=','-'];if(!keys.includes(ev.key))return;ev.preventDefault();setAuto(false);flight=null;const step=8/magnification;if(ev.key==='ArrowLeft')rotation[0]-=step;if(ev.key==='ArrowRight')rotation[0]+=step;if(ev.key==='ArrowUp')rotation[1]=Math.min(85,rotation[1]+step);if(ev.key==='ArrowDown')rotation[1]=Math.max(-85,rotation[1]-step);if(ev.key==='+'||ev.key==='='){setZoom(magnification*1.3);return}if(ev.key==='-'){setZoom(magnification/1.3);return}updateProjection()});
   $('#globe-rotate').addEventListener('click',()=>{flight=null;setAuto(!auto)});
   $('#globe-zoom-in').addEventListener('click',()=>setZoom(magnification*1.35));
   $('#globe-zoom-out').addEventListener('click',()=>setZoom(magnification/1.35));
-  $('#globe-reset').addEventListener('click',()=>{setAuto(false);magnification=1;updateZoomUI();flight={start:performance.now(),from:[...rotation],to:[-110,-18,0]};$('#country-panel').hidden=true;activeId=null;$$('.memory-item').forEach(b=>b.classList.remove('active'))});
+  $('#globe-reset').addEventListener('click',()=>{setMapInteraction(false);setAuto(false);magnification=1;updateZoomUI();flight={start:performance.now(),from:[...rotation],to:[-110,-18,0]};$('#country-panel').hidden=true;activeId=null;$$('.memory-item').forEach(b=>b.classList.remove('active'))});
   $('#country-panel-close').addEventListener('click',()=>$('#country-panel').hidden=true);
   $('#dock-prev').addEventListener('click',()=>$('#memory-track').scrollBy({left:-410,behavior:reduced?'instant':'smooth'}));$('#dock-next').addEventListener('click',()=>$('#memory-track').scrollBy({left:410,behavior:reduced?'instant':'smooth'}));
   function guide(show){$('#explorer-guide').hidden=!show;$('#guide-toggle').setAttribute('aria-expanded',String(show))}$('#guide-toggle').addEventListener('click',()=>guide($('#explorer-guide').hidden));$('#guide-close').addEventListener('click',()=>guide(false));
   $('#about-toggle').addEventListener('click',()=>$('#about-dialog').showModal());
-  window.addEventListener('yanz:entries',ev=>updateEntries(ev.detail));window.addEventListener('yanz:focus',ev=>{const e=entries.find(x=>x.id===ev.detail);if(e)flyTo(e)});
+  $('#map-interaction-toggle').addEventListener('click',()=>setMapInteraction(!mapInteracting));
+  $$('.destination-filters button').forEach(b=>b.addEventListener('click',()=>{destinationScope=b.dataset.scope;renderDestinations()}));
+  $('#destination-search').addEventListener('input',ev=>{destinationQuery=ev.target.value;renderDestinations()});
+  document.addEventListener('keydown',ev=>{if(ev.key==='Escape'&&!document.querySelector('dialog[open]'))setMapInteraction(false)});
+  window.addEventListener('scroll',hideTooltip,{passive:true});
+  new IntersectionObserver(records=>{mapVisible=records[0].isIntersecting;if(!mapVisible&&mapInteracting)setMapInteraction(false)},{threshold:0}).observe(stage);
+  window.addEventListener('yanz:entries',ev=>updateEntries(ev.detail));window.addEventListener('yanz:focus',ev=>{const e=entries.find(x=>x.id===ev.detail);if(e){flyTo(e);window.scrollTo({top:0,behavior:reduced?'instant':'smooth'})}});
   window.addEventListener('resize',resize);document.addEventListener('visibilitychange',()=>{lastTime=0});
   function drawSphere(){const radius=r*magnification;
     // Halo and orbital ring.
@@ -88,7 +104,7 @@
     ctx.font='7px "Segoe UI",sans-serif';ctx.letterSpacing='1px';ctx.fillStyle='rgba(135,162,112,.45)';if(w>760){ctx.fillText('N',cx-2,cy-radius-37);ctx.fillText('S',cx-2,cy+radius+43);ctx.strokeStyle='rgba(149,178,120,.24)';ctx.lineWidth=.6;ctx.beginPath();ctx.moveTo(cx,cy-radius-30);ctx.lineTo(cx,cy-radius-23);ctx.moveTo(cx,cy+radius+23);ctx.lineTo(cx,cy+radius+30);ctx.stroke()}ctx.letterSpacing='0px';
     if(ripple){const t=(performance.now()-ripple.time)/650;if(t>1)ripple=null;else{ctx.strokeStyle=`rgba(216,192,143,${(1-t)*.6})`;ctx.lineWidth=1;ctx.beginPath();ctx.arc(ripple.x,ripple.y,6+t*20,0,Math.PI*2);ctx.stroke()}}
   }
-  function frame(time){if(!lastTime)lastTime=time;const delta=Math.min(time-lastTime,50);lastTime=time;if(!document.hidden){elapsed+=delta;if(flight){const t=Math.min(1,(time-flight.start)/(reduced?1:1100)),ease=1-Math.pow(1-t,3);const dx=((flight.to[0]-flight.from[0]+540)%360)-180;rotation=[flight.from[0]+dx*ease,flight.from[1]+(flight.to[1]-flight.from[1])*ease,0];if(t===1)flight=null;updateProjection()}else if(auto&&!dragging&&!document.querySelector('dialog[open]')&&!hovered){rotation[0]+=delta*.00065;updateProjection()}ctx.clearRect(0,0,w,h);if(countries.length)drawSphere();if(Math.round(time/100)%5===0){const center=projection.invert([cx,cy]);$('#globe-coordinate').textContent=Math.abs(center[0]).toFixed(0)+'° '+(center[0]>=0?'E':'W')+' / '+Math.abs(center[1]).toFixed(0)+'° '+(center[1]>=0?'N':'S')}}requestAnimationFrame(frame)}
+  function frame(time){if(!lastTime)lastTime=time;const delta=Math.min(time-lastTime,50);lastTime=time;if(!document.hidden&&mapVisible){elapsed+=delta;if(flight){const t=Math.min(1,(time-flight.start)/(reduced?1:1100)),ease=1-Math.pow(1-t,3);const dx=((flight.to[0]-flight.from[0]+540)%360)-180;rotation=[flight.from[0]+dx*ease,flight.from[1]+(flight.to[1]-flight.from[1])*ease,0];if(t===1)flight=null;updateProjection()}else if(auto&&!dragging&&!document.querySelector('dialog[open]')&&!hovered){rotation[0]+=delta*.00065;updateProjection()}ctx.clearRect(0,0,w,h);if(countries.length)drawSphere();if(Math.round(time/100)%5===0){const center=projection.invert([cx,cy]);$('#globe-coordinate').textContent=Math.abs(center[0]).toFixed(0)+'° '+(center[0]>=0?'E':'W')+' / '+Math.abs(center[1]).toFixed(0)+'° '+(center[1]>=0?'N':'S')}}requestAnimationFrame(frame)}
   updateEntries(entries);setAuto(auto);resize();updateZoomUI();
   fetch('./assets/world.geojson').then(r=>{if(!r.ok)throw new Error('map');return r.json()}).then(data=>{countries=data.features.filter(c=>c.properties.ADMIN!=='Antarctica');$('#globe-loading').hidden=true;requestAnimationFrame(frame);window.YANZ_GLOBE_READY=true}).catch(()=>{$('#globe-loading').innerHTML='地球暂时没有展开，请从下方时间轴打开旅程。'});
 })();
