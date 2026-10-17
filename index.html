@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f8f7f2">
+  <meta name="description" content="YanZ 的个人旅行与生活手记。沿着地图，收藏路上的风景，也记录日常里值得记住的时刻。">
+  <title>世界还很大 — YanZ 的旅行与生活手记</title>
+  <link rel="icon" type="image/svg+xml" href="./assets/favicon.svg">
+  <link rel="stylesheet" href="./style.css">
+  <script src="./data.js" defer></script>
+  <script src="./app.js" defer></script>
+</head>
+<body>
+  <svg class="icon-defs" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs>
+    <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14m-6-6 6 6-6 6"/></symbol>
+    <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18M5 6h14M5 18h14"/></symbol>
+    <symbol id="i-pin" viewBox="0 0 24 24"><path d="M19 10c0 5-7 11-7 11S5 15 5 10a7 7 0 1 1 14 0Z"/><circle cx="12" cy="10" r="2.5"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+    <symbol id="i-close" viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></symbol>
+    <symbol id="i-book" viewBox="0 0 24 24"><path d="M12 6C9 4 5 4 3 5v14c3-1 6-1 9 1 3-2 6-2 9-1V5c-2-1-6-1-9 1Zm0 0v14"/></symbol>
+    <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 1v3m0 16v3M1 12h3m16 0h3M4 4l2 2m12 12 2 2M4 20l2-2M18 6l2-2"/></symbol>
+  </defs></svg>
+  <a class="skip-link" href="#main">跳到正文</a>
+  <header class="header wrap">
+    <a href="#" class="brand" aria-label="世界还很大，首页"><span class="brand-mark"><svg><use href="#i-globe"/></svg></span><span>世界还很大<small>THE WORLD IS STILL WIDE</small></span></a>
+    <nav aria-label="主导航"><a href="#atlas" class="nav-link">旅行地图</a><a href="#journal" class="nav-link">沿途手记</a><a href="#about" class="nav-link">关于我</a></nav>
+    <button class="manage-btn" id="manage"><span class="status-dot"></span> YanZ 的手记 <svg class="icon"><use href="#i-arrow"/></svg></button>
+  </header>
+  <main id="main">
+    <section class="hero wrap" aria-labelledby="hero-title">
+      <div class="hero-copy">
+        <p class="eyebrow"><span class="tiny-line"></span> A PERSONAL JOURNAL BY YANZ</p>
+        <h1 id="hero-title">世界还很大，<br>慢慢<span class="underlined">走着看。</span></h1>
+        <p class="hero-description">去远方，也回到日常。<br>把路上的风景、偶遇和心情，<br>收进一本没有最后一页的手记。</p>
+        <div class="hero-actions"><a class="button primary" href="#atlas">打开我的旅行地图 <svg class="icon"><use href="#i-arrow"/></svg></a><a class="text-link" href="#journal">随便翻翻 <span>↗</span></a></div>
+        <div class="hero-bottom"><span class="handwritten">A little further, a little more curious.</span><svg class="sketch-arrow" viewBox="0 0 90 40" aria-hidden="true"><path d="M4 30C42 42 65 8 82 11M72 4l12 6-6 12"/></svg></div>
+      </div>
+      <div class="hero-art" aria-label="山野与湖泊的旅行氛围拼贴">
+        <div class="art-grid"></div><span class="orbit orbit-one"></span><span class="orbit orbit-two"></span>
+        <div class="photo-main"><img src="./assets/mountains.jpg" alt="云雾掠过雄伟的山峰，山坡上是夏日的绿色" fetchpriority="high"><span class="photo-caption">SOMEWHERE, OUT THERE.</span></div>
+        <div class="floating-note"><span class="note-pin"></span><svg class="icon"><use href="#i-sun"/></svg><span>保持好奇<br><strong>就一直在路上。</strong></span></div>
+        <figure class="polaroid"><img src="./assets/lake.jpg" alt="群山围绕着一汪平静的湖泊"><figcaption>a little further ↗</figcaption></figure>
+        <span class="round-stamp">随 心 出 发<span>✳</span> KEEP WANDERING</span>
+        <svg class="flight-path" viewBox="0 0 570 430" aria-hidden="true"><path d="M24 340C-26 240 77 222 132 245S259 312 309 199 403 68 539 99"/><g transform="translate(529 86) rotate(23)"><path class="plane" d="m0 9 28-9-9 27-6-12Z M13 15 28 0"/></g></svg>
+        <span class="image-credit">氛围参考图 · 非个人实拍</span>
+      </div>
+    </section>
+    <div class="journey-strip wrap"><p><span class="status-dot"></span> 日子在继续，故事也是。</p><div><span><b id="trip-count">00</b> 旅行足迹</span><i></i><span><b id="life-count">00</b> 生活片段</span><i></i><span><b>∞</b> 未知的可能</span></div><a href="#atlas" aria-label="向下探索">往下探索 <span>↓</span></a></div>
+    <section class="atlas-section section wrap" id="atlas" aria-labelledby="atlas-title">
+      <div class="section-heading"><div><p class="eyebrow">01 / MY LITTLE ATLAS</p><h2 id="atlas-title">故事，发生在地图上<span class="orange">。</span></h2></div><p class="section-aside">每一个坐标，都是生活的另一种可能。<br>点击地图，记下一个想留下的瞬间。</p></div>
+      <div class="atlas-board">
+        <aside class="atlas-sidebar"><div class="sidebar-label"><svg class="icon"><use href="#i-pin"/></svg> 我的足迹 <span id="map-count">0</span></div><div id="destination-list" class="destination-list"></div><div class="map-side-note"><span>✳</span><p>不急着填满地图，<br>先认真记住一处风景。</p></div></aside>
+        <div class="map-area"><div class="map-toolbar"><span><span class="status-dot"></span> <span id="map-state">世界地图</span></span><div class="segmented" aria-label="地图范围"><button id="world-view" class="active" aria-pressed="true">世界</button><button id="asia-view" aria-pressed="false">亚洲</button></div></div>
+          <div class="map-viewport" id="map-viewport"><svg id="world-map" viewBox="0 0 1000 500" role="group" aria-label="互动旅行地图。点击地点添加手记，或使用下方按钮手动输入坐标。"><defs><pattern id="map-grid" width="83.333" height="83.333" patternUnits="userSpaceOnUse"><path d="M83.333 0H0V83.333" fill="none" stroke="#aabbb5" stroke-width=".6" opacity=".25"/></pattern></defs><g id="map-scene"><rect x="0" y="0" width="1000" height="500" fill="url(#map-grid)"/><g id="countries"></g><text x="164" y="215" class="ocean-label">PACIFIC OCEAN</text><text x="432" y="250" class="ocean-label">ATLANTIC</text><text x="698" y="355" class="ocean-label">INDIAN OCEAN</text><g id="map-pins"></g><g id="selected-pin"></g></g></svg><div id="map-error" class="map-error" hidden>地图暂时无法载入，你仍可以通过「记录旅程」手动添加地点。</div><div class="map-compass" aria-hidden="true">N<span>✧</span></div><div class="map-zoom"><button id="zoom-in" aria-label="放大地图">+</button><button id="zoom-out" aria-label="缩小地图">−</button><button id="zoom-reset" aria-label="重置地图">⌖</button></div><div class="map-selection" id="map-selection" hidden><button class="selection-close" id="close-selection" aria-label="关闭地点选择">×</button><small id="selected-coordinate"></small><strong>从这里，开始一段故事。</strong><button class="text-link" id="add-at-point">记录这个地方 <span>↗</span></button></div></div>
+          <div class="map-footer"><span><i class="legend-dot"></i> 已记录的旅程 <span class="map-helper">· 点击任意位置留下足迹</span></span><button class="text-link" id="add-trip">记录旅程 <span>＋</span></button></div>
+        </div>
+      </div><div class="map-under"><span>YOUR OWN MAP. YOUR OWN PACE.</span><span>Natural Earth · 属于自己的旅行地图</span></div>
+    </section>
+    <section class="journal-section section wrap" id="journal" aria-labelledby="journal-title"><div class="section-heading"><div><p class="eyebrow">02 / NOTES ALONG THE WAY</p><h2 id="journal-title">那些，想记住的时刻<span class="orange">。</span></h2></div><div class="journal-filters" role="group" aria-label="筛选手记"><button data-filter="all" class="active" aria-pressed="true">全部</button><button data-filter="travel" aria-pressed="false">旅行</button><button data-filter="life" aria-pressed="false">生活</button></div></div><div id="journal-grid" class="journal-grid"></div></section>
+    <section class="about-section wrap" id="about"><div class="about-sketch" aria-hidden="true"><div class="sketch-sun">☼</div><svg viewBox="0 0 250 150"><path d="m12 124 57-80 36 44 38-65 95 101M46 79l23-35 16 20m35-1 23-40 28 36M4 131c55-9 89 12 136 1s72-3 105 0M109 132l24-29 26 29m-37 0 11-29"/></svg><span>stay curious.</span></div><div class="about-copy"><p class="eyebrow">A SMALL NOTE ABOUT ME</p><h2>嗨，我是 <em>YanZ</em><span class="orange">。</span></h2><p>我想把走过的路，慢慢画成漫画。<br>也用文字，留下画面之外的见闻与心情。<br>这里记录旅行，也收藏生活里值得记住的时刻。</p><span class="about-sign">See you somewhere in the world. <b>YanZ ↗</b></span></div><span class="about-side">A LIFE MADE OF LITTLE MOMENTS.</span></section>
+  </main>
+  <footer class="footer wrap"><a class="footer-brand" href="#">世界还很大 <span>↗</span></a><p>© <span id="year">2026</span> YanZ · 在路上，也在生活里。</p><a href="#">回到顶部 ↑</a></footer>
+  <dialog id="editor" class="dialog editor-dialog" aria-labelledby="editor-title"><div class="dialog-top"><div><p class="eyebrow">MAKE A LITTLE MEMORY</p><h2 id="editor-title">记下一段旅程</h2></div><button class="icon-button" data-close="editor" aria-label="关闭编辑器"><svg class="icon"><use href="#i-close"/></svg></button></div><p class="local-notice">本地草稿：只保存在当前浏览器。记得导出备份；换设备或清理浏览器后不会自动同步。</p><form id="entry-form"><input type="hidden" name="id"><div class="form-row"><label>记录类型<select name="kind" id="entry-kind"><option value="travel">旅行</option><option value="life">生活</option></select></label><label>标题<input name="title" required maxlength="80" placeholder="给这个瞬间起个名字"></label></div><label>地点<input name="place" maxlength="80" placeholder="城市、山野，或你喜欢的一个角落"></label><div class="form-row coordinates"><label>纬度（−90 至 90）<input name="lat" type="number" min="-90" max="90" step="any" placeholder="可先在地图点击选点"></label><label>经度（−180 至 180）<input name="lng" type="number" min="-180" max="180" step="any" placeholder="也可以直接填写坐标"></label></div><div class="form-row"><label>开始日期<input name="start" type="date"></label><label>结束日期（可选）<input name="end" type="date"></label></div><label>封面照片 <span class="optional">可选，图片会压缩后保存在本地</span><input id="cover-input" type="file" accept="image/jpeg,image/png,image/webp"></label><div class="cover-preview" id="cover-preview" hidden><img id="cover-img" alt="封面预览"><button type="button" id="remove-cover">移除照片</button></div><div class="comic-editor"><label>旅行漫画 <span class="optional">可选，最多 6 张，按选择顺序排列</span><input id="comic-input" type="file" multiple accept="image/jpeg,image/png,image/webp"></label><p class="field-hint">画面留住瞬间，每张漫画配一句短注；更完整的感受写在下面。</p><div id="comic-previews"></div></div><label>文字手记<textarea name="story" rows="5" maxlength="20000" placeholder="那天发生了什么？你想记住什么？"></textarea></label><label>行程 <span class="optional">可选，每行一个行程节点</span><textarea name="itinerary" rows="3" maxlength="10000" placeholder="第一天：……&#10;第二天：……"></textarea></label><label>实用笔记 / 攻略 <span class="optional">可选，每行一条</span><textarea name="tips" rows="3" maxlength="10000" placeholder="交通、住处、好吃的，或者下次想提醒自己的事。"></textarea></label><p class="form-error" id="form-error" role="alert"></p><div class="form-actions"><button type="button" class="button secondary" data-close="editor">取消</button><button type="submit" class="button primary" id="save-entry">保存手记 <svg class="icon"><use href="#i-arrow"/></svg></button></div></form></dialog>
+  <dialog id="library" class="dialog library-dialog" aria-labelledby="library-title"><div class="dialog-top"><div><p class="eyebrow">YOUR PERSONAL SPACE</p><h2 id="library-title">YanZ 的手记管理</h2></div><button class="icon-button" data-close="library" aria-label="关闭手记管理"><svg class="icon"><use href="#i-close"/></svg></button></div><p class="local-notice">当前是本地预览。编辑仅在这个浏览器生效，访客无法通过这里修改线上文件。正式发布时，将「导出发布文件」得到的 data.js 放回网站目录。</p><div class="library-actions"><button class="button primary" id="library-add">写一篇手记 ＋</button><button class="button secondary" id="export-json">备份 JSON ↓</button><button class="button secondary" id="import-json">导入备份 ↑</button><button class="button secondary" id="export-site">导出发布文件 ↓</button><input id="import-file" type="file" accept=".json,application/json" hidden></div><p id="library-feedback" role="status"></p><div id="library-list"></div></dialog>
+  <dialog id="reader" class="dialog reader-dialog" aria-labelledby="reader-title"><button class="icon-button reader-close" data-close="reader" aria-label="关闭手记"><svg class="icon"><use href="#i-close"/></svg></button><article id="reader-content"></article></dialog>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+</body>
+</html>
